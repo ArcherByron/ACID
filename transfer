@@ -1,0 +1,43 @@
+Sure, here's another example demonstrating ACID properties, this time focusing on atomicity and isolation:
+
+```python
+import sqlite3
+
+def transfer_funds(sender_id, recipient_id, amount):
+    conn = sqlite3.connect('bank.db')
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute('BEGIN TRANSACTION')
+
+        # Deduct amount from sender's account
+        cursor.execute('UPDATE accounts SET balance = balance - ? WHERE id = ?', (amount, sender_id))
+
+        # Add amount to recipient's account
+        cursor.execute('UPDATE accounts SET balance = balance + ? WHERE id = ?', (amount, recipient_id))
+
+        conn.commit()
+        print("Transaction committed")
+    except Exception as e:
+        conn.rollback()
+        print(f"Transaction rolled back: {e}")
+    finally:
+        conn.close()
+
+def main():
+    sender_id = 123
+    recipient_id = 456
+    amount = 100
+
+    transfer_funds(sender_id, recipient_id, amount)
+
+if __name__ == "__main__":
+    main()
+```
+
+In this example:
+
+- We're transferring funds from one account to another in a transaction.
+- The transaction ensures that either all updates (deduct from sender, add to recipient) are committed together or none of them are.
+- If any error occurs during the transaction, it's rolled back, ensuring that the data remains consistent and the operation is atomic.
+- This demonstrates both atomicity and isolation, as the transaction is treated as a single unit of work and the changes are isolated until the transaction is committed.
